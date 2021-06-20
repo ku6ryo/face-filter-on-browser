@@ -1,6 +1,6 @@
 Face filter on web.
 
-[screen](!capture.png)
+![screen](capture.png)
 
 This project is using pre-trained ML model provided by Google.
 https://www.npmjs.com/package/@tensorflow-models/face-landmarks-detection
