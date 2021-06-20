@@ -1,0 +1,25 @@
+{
+  "name": "face-filter-on-web",
+  "version": "1.0.0",
+  "description": "Face filter sample",
+  "scripts": {
+    "start": "webpack serve"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@tensorflow-models/face-landmarks-detection": "0.0.1",
+    "@tensorflow/tfjs": "^3.7.0",
+    "@tensorflow/tfjs-backend-webgl": "2.4.0",
+    "@tensorflow/tfjs-converter": "2.4.0",
+    "@tensorflow/tfjs-core": "2.4.0",
+    "@types/three": "^0.129.1",
+    "html-webpack-plugin": "^5.3.1",
+    "three": "^0.129.0",
+    "ts-loader": "^9.2.3",
+    "typescript": "^4.3.4",
+    "webpack": "^5.39.1",
+    "webpack-cli": "^4.7.2",
+    "webpack-dev-server": "^3.11.2"
+  }
+}
