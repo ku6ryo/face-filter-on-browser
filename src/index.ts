@@ -63,6 +63,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   document.body.appendChild(threeCanvas)
 
   const threeRenderer = new THREE.WebGLRenderer({ alpha: true, canvas: threeCanvas })
+  threeRenderer.setPixelRatio(2)
   const scene = new THREE.Scene();
   const light = new THREE.DirectionalLight(0xffffff)
   light.position.set(1, 1, 1);
