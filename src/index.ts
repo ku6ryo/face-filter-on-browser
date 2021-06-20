@@ -5,10 +5,12 @@ import * as THREE from "three"
 import { TRIANGLES } from "./triangle"
 import { UVs } from "./uv"
 import { uniforms, rainbowChecker as mat } from "./materials"
+import { OrthographicCamera } from "three"
 
 window.addEventListener("DOMContentLoaded", async () => {
   await tf.setBackend("webgl")
   let time = 0
+  let camera: null | OrthographicCamera = null
   const model = await detection.load(detection.SupportedPackages.mediapipeFacemesh)
   const update = async () => {
     time += 0.1
@@ -17,25 +19,21 @@ window.addEventListener("DOMContentLoaded", async () => {
     })
     if (predictions.length > 0) {
       const prediction = predictions[0]
-      const mesh = (prediction as any).scaledMesh
-      for (let j = 0; j < 468; j++) {
-        uvs[j * 2] = UVs[j][0]
-        uvs[j * 2 + 1] = 1 - UVs[j][1];
-      }
-      mesh.forEach((v: any, i:number) => {
+      const mesh = (prediction as any).scaledMesh as number[][]
+      mesh.forEach((v, i) => {
         positions[3 * i] = v[0] - 320
         positions[3 * i + 1] = - v[1] + 240
         positions[3 * i + 2] = v[2]
       })
-      g.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3))
-      g.getAttribute("position").needsUpdate = true;
-      g.setAttribute("uv", new THREE.BufferAttribute(uvs, 2))
-      g.getAttribute("uv").needsUpdate = true;
-      g.computeVertexNormals()
+      faceGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3))
+      faceGeometry.getAttribute("position").needsUpdate = true;
+      faceGeometry.setAttribute("uv", new THREE.BufferAttribute(uvs, 2))
+      faceGeometry.getAttribute("uv").needsUpdate = true;
+      faceGeometry.computeVertexNormals()
     }
     uniforms.iResolution.value.set(threeCanvas.width, threeCanvas.height, 1);
     uniforms.iTime.value = time;
-    threeRenderer.render(scene, camera)
+    threeRenderer.render(scene, camera!)
     requestAnimationFrame(() => update())
   }
   const videoElem = document.createElement("video")
@@ -45,7 +43,12 @@ window.addEventListener("DOMContentLoaded", async () => {
   videoElem.style.zIndex = "1"
   videoElem.autoplay = true
   videoElem.addEventListener("playing", () => {
+    const vw = videoElem.videoWidth
+    const vh = videoElem.videoHeight
     threeRenderer.setSize(videoElem.videoWidth, videoElem.videoHeight)
+    camera = new THREE.OrthographicCamera(-vw / 2, vw / 2, vh / 2, -vh / 2, 1, 10000)
+    camera.position.setZ(1000)
+    camera.lookAt(0, 0, 0)
     update()
   })
   document.body.appendChild(videoElem)
@@ -61,21 +64,21 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   const threeRenderer = new THREE.WebGLRenderer({ alpha: true, canvas: threeCanvas })
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(45, 16 / 12, 1, 10000);
-  camera.position.set(0, 0, 640)
-  camera.lookAt(0, 0, 0)
-  const light = new THREE.DirectionalLight(0xffffff);
+  const light = new THREE.DirectionalLight(0xffffff)
   light.position.set(1, 1, 1);
-  scene.add(light);
+  scene.add(light)
   const positions = new Float32Array(468 * 3)
   const uvs = new Float32Array(468 * 2);
-  const g = new THREE.BufferGeometry()
-  g.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3))
-  g.getAttribute("position").needsUpdate = true;
-  g.setAttribute("uv", new THREE.BufferAttribute(uvs, 2))
-  g.getAttribute("uv").needsUpdate = true;
-  g.setIndex(TRIANGLES)
-  g.computeVertexNormals()
-  scene.add(new THREE.Mesh(g, mat));
-  threeRenderer.render(scene, camera)
+  for (let j = 0; j < 468; j++) {
+    uvs[j * 2] = UVs[j][0]
+    uvs[j * 2 + 1] = 1 - UVs[j][1]
+  }
+  const faceGeometry = new THREE.BufferGeometry()
+  faceGeometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3))
+  faceGeometry.getAttribute("position").needsUpdate = true
+  faceGeometry.setAttribute("uv", new THREE.BufferAttribute(uvs, 2))
+  faceGeometry.getAttribute("uv").needsUpdate = true
+  faceGeometry.setIndex(TRIANGLES)
+  faceGeometry.computeVertexNormals()
+  scene.add(new THREE.Mesh(faceGeometry, mat));
 })
